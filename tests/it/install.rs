@@ -18,7 +18,7 @@ macro_rules! test_install {
         let book_toml = tmp.path().join("book.toml");
         fs::write(&book_toml, input).expect("can't write book.toml");
 
-        let mut cmd = Command::new(cargo::cargo_bin!("mdbook-mermaid"));
+        let mut cmd = Command::new(cargo::cargo_bin!("mdbook-wavedrom"));
         cmd.arg("install").current_dir(tmp.path());
         cmd.assert().success();
 
@@ -32,12 +32,12 @@ macro_rules! test_install {
         );
 
         assert!(
-            tmp.path().join("mermaid.min.js").exists(),
-            "Failed to copy mermaid.min.js"
+            tmp.path().join("wavedrom.min.js").exists(),
+            "Failed to copy wavedrom.min.js"
         );
         assert!(
-            tmp.path().join("mermaid-init.js").exists(),
-            "Failed to copy mermaid.min.js"
+            tmp.path().join("wavedrom-init.js").exists(),
+            "Failed to copy wavedrom.min.js"
         );
     };
 }

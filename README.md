@@ -1,81 +1,65 @@
-# mdbook-mermaid
+# mdbook-wavedrom
 
-A preprocessor for [mdbook][] to add [mermaid.js][] support.
+A preprocessor for [mdbook][] to add [wavedrom][] support.
+This is based diretly on [mdbook-mermaid][], and is basically just a search/replace.
 
 [mdbook]: https://github.com/rust-lang-nursery/mdBook
-[mermaid.js]: https://mermaidjs.github.io/
+[wavedrom]: https://github.com/wavedrom/wavedrom
+[mdbook-mermaid]: https://github.com/badboy/mdbook-mermaid
 
 It turns this:
 
 ~~~
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+```wavedrom
+{signal: [
+  {name: 'clk', wave: 'p.....|...'},
+  {name: 'dat', wave: 'x.345x|=.x', data: ['head', 'body', 'tail', 'data']},
+  {name: 'req', wave: '0.1..0|1.0'},
+  {},
+  {name: 'ack', wave: '1.....|01.'}
+]}
 ```
 ~~~
 
 into this:
 
-![Simple Graph](simple-graph.png)
+![Exemple Diagram](example-diagram.png)
 
 in your book.
-(Graph provided by [Mermaid Live Editor](https://mermaidjs.github.io/mermaid-live-editor/#/view/eyJjb2RlIjoiZ3JhcGggVEQ7XG4gICAgQS0tPkI7XG4gICAgQS0tPkM7XG4gICAgQi0tPkQ7XG4gICAgQy0tPkQ7IiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifX0))
+(Graph provided by [wavedrom Live Editor](https://wavedrom.com/editor.html)
 
 ## Installation
 
-### From source
-
-To install it from source:
+If you want to use only this preprocessor, install the tool:
 
 ```
-cargo install mdbook-mermaid
+cargo install mdbook-wavedrom
 ```
 
-This will build `mdbook-mermaid` from source.
-
-### Using `cargo-binstall`
-
-If you have [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) already:
+Then let `mdbook-wavedrom` add the required files and configuration:
 
 ```
-cargo binstall mdbook-mermaid
+mdbook-wavedrom install path/to/your/book
 ```
 
-This will download and install the pre-built binary for your system.
-
-### Manually
-
-Binary releases are available on the [Releases page](https://github.com/badboy/mdbook-mermaid/releases).
-Download the relevant package for your system, unpack it, and move the `mdbook-mermaid` executable into `$HOME/.cargo/bin`:
-
-## Configure your mdBook to use `mdbook-mermaid`
-
-When adding `mdbook-mermaid` for the first time, let it add the required files and configuration:
-
-```
-mdbook-mermaid install path/to/your/book
-```
 
 This will add the following configuration to your `book.toml`:
 
 ```toml
-[preprocessor.mermaid]
-command = "mdbook-mermaid"
+[preprocessor.wavedrom]
+command = "mdbook-wavedrom"
 
 [output.html]
-additional-js = ["mermaid.min.js", "mermaid-init.js"]
+additional-js = ["wavedrom.min.js", "wavedrom-default.js"]
 ```
 
-It will skip any unnecessary changes and detect if `mdbook-mermaid` was already configured.
+It will skip any unnecessary changes and detect if `mdbook-wavedrom` was already configured.
 
-Additionally it copies the files `mermaid.min.js` and  `mermaid-init.js` into your book's directory.
+Additionally it copies the files `wavedrom.min.js` and  `wavedrom-init.js` into your book's directory.
 You find these files in the [`src/bin/assets`](src/bin/assets) directory.
-You can modify `mermaid-init.js` to configure Mermaid, see the [Mermaid documentation] for all options.
+You can modify `wavedrom-init.js` to configure wavedrom, see the [wavedrom documentation] for all options.
 
-[Mermaid documentation]: https://mermaid-js.github.io/mermaid/#/Setup?id=mermaidapi-configuration-defaults
+[wavedrom documentation]: https://github.com/wavedrom/wavedrom
 
 Finally, build your book:
 
@@ -83,31 +67,6 @@ Finally, build your book:
 mdbook path/to/book
 ```
 
-## Development
-
-### Update the bundled mermaid.js
-
-Find the latest version of `mermaid` on <https://github.com/mermaid-js/mermaid/releases>.
-Then run:
-
-```
-cargo xtask <version>
-```
-
-This will fetch the minified mermaid.js file and commit it.
-
-**Note:** `mdbook-mermaid` does NOT automatically update the `mermaid.min.js` file in your book. For that rerun
-
-```
-mdbook-mermaid install path/to/your/book
-```
-
-or manually replace the file.
-
 ## License
 
 MPL. See [LICENSE](LICENSE).  
-Copyright (c) 2018-2024 Jan-Erik Rediger <janerik@fnordig.de>
-
-Mermaid is [MIT licensed](https://github.com/knsv/mermaid/blob/master/LICENSE).
-The bundled assets (`mermaid.min.js`) are MIT licensed.

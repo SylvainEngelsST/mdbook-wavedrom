@@ -1,7 +1,7 @@
 use clap::{crate_version, Arg, ArgMatches, Command};
-use mdbook_mermaid::Mermaid;
 use mdbook_preprocessor::errors::Error;
 use mdbook_preprocessor::Preprocessor;
+use mdbook_wavedrom::Wavedrom;
 use semver::{Version, VersionReq};
 use toml_edit::{value, Array, Document, Item, Table, Value};
 
@@ -12,17 +12,17 @@ use std::{
     process,
 };
 
-const MERMAID_JS: &[u8] = include_bytes!("assets/mermaid.min.js");
-const MERMAID_INIT_JS: &[u8] = include_bytes!("assets/mermaid-init.js");
-const MERMAID_FILES: &[(&str, &[u8])] = &[
-    ("mermaid.min.js", MERMAID_JS),
-    ("mermaid-init.js", MERMAID_INIT_JS),
+const WAVEDROM_JS: &[u8] = include_bytes!("assets/wavedrom.min.js");
+const WAVEDROM_INIT_JS: &[u8] = include_bytes!("assets/wavedrom-init.js");
+const WAVEDROM_FILES: &[(&str, &[u8])] = &[
+    ("wavedrom.min.js", WAVEDROM_JS),
+    ("wavedrom-init.js", WAVEDROM_INIT_JS),
 ];
 
 pub fn make_app() -> Command {
-    Command::new("mdbook-mermaid")
+    Command::new("mdbook-wavedrom")
         .version(crate_version!())
-        .about("mdbook preprocessor to add mermaid support")
+        .about("mdbook preprocessor to add wavedrom support")
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
@@ -62,14 +62,14 @@ fn handle_preprocessing() -> Result<(), Error> {
 
     if !req.matches(&called_version) {
         eprintln!(
-            "Warning: The mdbook-mermaid preprocessor was built against version \
+            "Warning: The mdbook-wavedrom preprocessor was built against version \
              {} of mdbook, but we're being called from version {}",
             mdbook_preprocessor::MDBOOK_VERSION,
             ctx.mdbook_version
         );
     }
 
-    let processed_book = Mermaid.run(&ctx, book)?;
+    let processed_book = Wavedrom.run(&ctx, book)?;
     serde_json::to_writer(io::stdout(), &processed_book)?;
 
     Ok(())
@@ -79,7 +79,7 @@ fn handle_supports(sub_args: &ArgMatches) -> ! {
     let renderer = sub_args
         .get_one::<String>("renderer")
         .expect("Required argument");
-    let supported = Mermaid.supports_renderer(renderer);
+    let supported = Wavedrom.supports_renderer(renderer);
 
     // Signal whether the renderer is supported by exiting with 1 or 0.
     if let Ok(true) = supported {
@@ -124,7 +124,7 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
     }
 
     let mut printed = false;
-    for (name, content) in MERMAID_FILES {
+    for (name, content) in WAVEDROM_FILES {
         let filepath = proj_dir.join(name);
         if filepath.exists() {
             log::debug!(
@@ -147,13 +147,15 @@ fn handle_install(sub_args: &ArgMatches) -> ! {
         }
     }
 
-    log::info!("Files & configuration for mdbook-mermaid are installed. You can start using it in your book.");
-    let codeblock = r#"```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+    log::info!("Files & configuration for mdbook-wavedrom are installed. You can start using it in your book.");
+    let codeblock = r#"```wavedrom
+{signal: [
+  {name: 'clk', wave: 'p.....|...'},
+  {name: 'dat', wave: 'x.345x|=.x', data: ['head', 'body', 'tail', 'data']},
+  {name: 'req', wave: '0.1..0|1.0'},
+  {},
+  {name: 'ack', wave: '1.....|01.'}
+]}
 ```"#;
     log::info!("Add a code block like:\n{}", codeblock);
 
@@ -164,7 +166,7 @@ fn add_additional_files(doc: &mut Document) -> bool {
     let mut changed = false;
     let mut printed = false;
 
-    let file = "mermaid.min.js";
+    let file = "wavedrom.min.js";
     let additional_js = additional(doc, "js");
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
@@ -176,7 +178,7 @@ fn add_additional_files(doc: &mut Document) -> bool {
         changed = true;
     }
 
-    let file = "mermaid-init.js";
+    let file = "wavedrom-init.js";
     let additional_js = additional(doc, "js");
     if has_file(&additional_js, file) {
         log::debug!("'{}' already in 'additional-js'. Skipping", file)
@@ -205,7 +207,7 @@ fn additional<'a>(doc: &'a mut Document, additional_type: &str) -> Option<&'a mu
 
 fn has_preprocessor(doc: &mut Document) -> bool {
     doc.get("preprocessor")
-        .and_then(|p| p.get("mermaid"))
+        .and_then(|p| p.get("wavedrom"))
         .map(|m| matches!(m, Item::Table(_)))
         .unwrap_or(false)
 }
@@ -219,9 +221,9 @@ fn add_preprocessor(doc: &mut Document) {
     let item = item
         .as_table_mut()
         .unwrap()
-        .entry("mermaid")
+        .entry("wavedrom")
         .or_insert(empty_table);
-    item["command"] = value("mdbook-mermaid");
+    item["command"] = value("mdbook-wavedrom");
 }
 
 fn has_file(elem: &Option<&mut Array>, file: &str) -> bool {

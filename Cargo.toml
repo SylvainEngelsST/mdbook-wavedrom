@@ -1,15 +1,15 @@
 [package]
-name = "mdbook-mermaid"
-version = "0.17.1"
-authors = ["Jan-Erik Rediger <janerik@fnordig.de>"]
-description = "mdbook preprocessor to add mermaid support"
+name = "mdbook-wavedrom"
+version = "0.11.0"
+authors = ["Sylvain ENGELS"]
+description = "mdbook preprocessor to add wavedrom support"
 license = "MPL-2.0"
-homepage = "https://github.com/badboy/mdbook-mermaid"
-repository = "https://github.com/badboy/mdbook-mermaid"
+homepage = "https://github.com/SylvainEngelsST/mdbook-wavedrom"
+repository = "https://github.com/SylvainEngelsST/mdbook-wavedrom"
 edition = "2018"
 
 [dependencies]
-mdbook-preprocessor = "0.5.0"
+mdbook-preprocessor = "0.5.4"
 pulldown-cmark = { version = "0.10.0", default-features = false }
 env_logger = "0.11.8"
 log = "0.4.11"

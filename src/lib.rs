@@ -7,11 +7,11 @@ use mdbook_preprocessor::errors::Result;
 use mdbook_preprocessor::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag, TagEnd};
 
-pub struct Mermaid;
+pub struct Wavedrom;
 
-impl Preprocessor for Mermaid {
+impl Preprocessor for Wavedrom {
     fn name(&self) -> &str {
-        "mermaid"
+        "wavedrom"
     }
 
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
@@ -22,7 +22,7 @@ impl Preprocessor for Mermaid {
             }
 
             if let BookItem::Chapter(ref mut chapter) = *item {
-                res = Some(Mermaid::add_mermaid(chapter).map(|md| {
+                res = Some(Wavedrom::add_wavedrom(chapter).map(|md| {
                     chapter.content = md;
                 }));
             }
@@ -50,9 +50,9 @@ fn escape_html(s: &str) -> String {
     output
 }
 
-fn add_mermaid(content: &str) -> Result<String> {
-    let mut mermaid_content = String::new();
-    let mut in_mermaid_block = false;
+fn add_wavedrom(content: &str) -> Result<String> {
+    let mut wavedrom_content = String::new();
+    let mut in_wavedrom_block = false;
 
     let mut opts = Options::empty();
     opts.insert(Options::ENABLE_TABLES);
@@ -63,20 +63,20 @@ fn add_mermaid(content: &str) -> Result<String> {
     let mut code_span = 0..0;
     let mut start_new_code_span = true;
 
-    let mut mermaid_blocks = vec![];
+    let mut wavedrom_blocks = vec![];
 
     let events = Parser::new_ext(content, opts);
     for (e, span) in events.into_offset_iter() {
         log::debug!("e={:?}, span={:?}", e, span);
         if let Event::Start(Tag::CodeBlock(Fenced(code))) = e.clone() {
-            if &*code == "mermaid" {
-                in_mermaid_block = true;
-                mermaid_content.clear();
+            if &*code == "wavedrom" {
+                in_wavedrom_block = true;
+                wavedrom_content.clear();
             }
             continue;
         }
 
-        if !in_mermaid_block {
+        if !in_wavedrom_block {
             continue;
         }
 
@@ -94,19 +94,19 @@ fn add_mermaid(content: &str) -> Result<String> {
         }
 
         if let Event::End(TagEnd::CodeBlock) = e {
-            in_mermaid_block = false;
+            in_wavedrom_block = false;
 
-            let mermaid_content = &content[code_span.clone()];
-            let mermaid_content = escape_html(mermaid_content);
-            let mermaid_content = mermaid_content.replace("\r\n", "\n");
-            let mermaid_code = format!("<pre class=\"mermaid\">{}</pre>\n\n", mermaid_content);
-            mermaid_blocks.push((span, mermaid_code));
+            let wavedrom_content = &content[code_span.clone()];
+            let wavedrom_content = escape_html(wavedrom_content);
+            let wavedrom_content = wavedrom_content.replace("\r\n", "\n");
+            let wavedrom_code = format!("<pre class=\"wavedrom\">{}</pre>\n\n", wavedrom_content);
+            wavedrom_blocks.push((span, wavedrom_code));
             start_new_code_span = true;
         }
     }
 
     let mut content = content.to_string();
-    for (span, block) in mermaid_blocks.iter().rev() {
+    for (span, block) in wavedrom_blocks.iter().rev() {
         let pre_content = &content[0..span.start];
         let post_content = &content[span.end..];
         content = format!("{}\n{}{}", pre_content, block, post_content);
@@ -114,9 +114,9 @@ fn add_mermaid(content: &str) -> Result<String> {
     Ok(content)
 }
 
-impl Mermaid {
-    fn add_mermaid(chapter: &mut Chapter) -> Result<String> {
-        add_mermaid(&chapter.content)
+impl Wavedrom {
+    fn add_wavedrom(chapter: &mut Chapter) -> Result<String> {
+        add_wavedrom(&chapter.content)
     }
 }
 
@@ -124,15 +124,16 @@ impl Mermaid {
 mod test {
     use pretty_assertions::assert_eq;
 
-    use super::add_mermaid;
+    use super::add_wavedrom;
 
     #[test]
-    fn adds_mermaid() {
+    fn adds_wavedrom() {
         let content = r#"# Chapter
 
-```mermaid
-graph TD
-A --> B
+```wavedrom
+{signal: [
+  {name: 'clk', wave: 'p.....|...'}
+]}
 ```
 
 Text
@@ -141,8 +142,9 @@ Text
         let expected = r#"# Chapter
 
 
-<pre class="mermaid">graph TD
-A --&gt; B
+<pre class="wavedrom">{signal: [
+  {name: 'clk', wave: 'p.....|...'}
+]}
 </pre>
 
 
@@ -150,7 +152,7 @@ A --&gt; B
 Text
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 
     #[test]
@@ -172,7 +174,7 @@ Text
 | Row 1  | Row 2  |
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 
     #[test]
@@ -198,7 +200,7 @@ Text
 </del>
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 
     #[test]
@@ -224,14 +226,14 @@ Text
 2. paragraph 2
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 
     #[test]
-    fn escape_in_mermaid_block() {
+    fn escape_in_wavedrom_block() {
         let _ = env_logger::try_init();
         let content = r#"
-```mermaid
+```wavedrom
 classDiagram
     class PingUploader {
         <<interface>>
@@ -244,7 +246,7 @@ hello
 
         let expected = r#"
 
-<pre class="mermaid">classDiagram
+<pre class="wavedrom">classDiagram
     class PingUploader {
         &lt;&lt;interface&gt;&gt;
         +Upload() UploadResult
@@ -256,7 +258,7 @@ hello
 hello
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 
     #[test]
@@ -264,10 +266,11 @@ hello
         let _ = env_logger::try_init();
         let content = r#"# Chapter
 
-````mermaid
-graph TD
-A --> B
-````
+```wavedrom
+{signal: [
+  {name: 'clk', wave: 'p.....|...'}
+]}
+```
 
 Text
 "#;
@@ -275,8 +278,9 @@ Text
         let expected = r#"# Chapter
 
 
-<pre class="mermaid">graph TD
-A --&gt; B
+<pre class="wavedrom">{signal: [
+  {name: 'clk', wave: 'p.....|...'}
+]}
 </pre>
 
 
@@ -284,16 +288,16 @@ A --&gt; B
 Text
 "#;
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 
     #[test]
     fn crlf_line_endings() {
         let _ = env_logger::try_init();
-        let content = "# Chapter\r\n\r\n````mermaid\r\n\r\ngraph TD\r\nA --> B\r\n````";
+        let content = "# Chapter\r\n\r\n````wavedrom\r\n\r\n{signal: [\r\n{name: 'clk', wave: 'p.....|...'}\r\n]}\r\n````";
         let expected =
-            "# Chapter\r\n\r\n\n<pre class=\"mermaid\">\ngraph TD\nA --&gt; B\n</pre>\n\n";
+            "# Chapter\r\n\r\n\n<pre class=\"wavedrom\">\n{signal: [\n{name: 'clk', wave: 'p.....|...'}\n]}\n</pre>\n\n";
 
-        assert_eq!(expected, add_mermaid(content).unwrap());
+        assert_eq!(expected, add_wavedrom(content).unwrap());
     }
 }

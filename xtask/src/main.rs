@@ -10,21 +10,20 @@ use xshell::{Shell, cmd};
 
 type Result<T, E = Box<dyn std::error::Error>> = std::result::Result<T, E>;
 
-const LICENSE_HEADER: &str = r#"/* MIT Licensed. Copyright (c) 2014 - 2022 Knut Sveidqvist */
-/* For license information please see https://github.com/mermaid-js/mermaid/blob/develop/LICENSE */
+const LICENSE_HEADER: &str = r#"/* MIT Licensed. Copyright (c) 2011-2026 Aliaksei Chapyzhenka */
+/* For license information please see https://github.com/wavedrom/wavedrom/blob/trunk/LICENSE */
 "#;
 
 fn main() -> Result<()> {
     let mut args = env::args().skip(1);
-    let version = args.next().expect("Need mermaid.js version");
+    let version = args.next().expect("Need wavedrom.js version");
 
-    let release_url =
-        format!("https://github.com/mermaid-js/mermaid/releases/tag/mermaid%40{version}");
-    let asset_url = format!("https://unpkg.com/mermaid@{version}/dist/mermaid.min.js");
-    let asset_path = "src/bin/assets/mermaid.min.js";
+    let release_url = format!("https://github.com/wavedrom/wavedrom/releases/tag/{version}");
+    let asset_url = format!("https://app.unpkg.com/wavedrom@{version}/files/wavedrom.min.js");
+    let asset_path = "src/bin/assets/wavedrom.min.js";
 
     let commit_msg =
-        format!("Upgrade to mermaid v{version}\n\nRelease: {release_url}\nAsset URL: {asset_url}");
+        format!("Upgrade to wavedrom {version}\n\nRelease: {release_url}\nAsset URL: {asset_url}");
 
     let sh = Shell::new()?;
 
