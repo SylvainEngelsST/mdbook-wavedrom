@@ -3,7 +3,7 @@
 This document explains how to propose a change (pull request) and, most
 importantly, how to verify that the repository still behaves correctly after an
 update. `mdbook-wavedrom` is a preprocessor for [mdbook][] that turns fenced
-` ```wavedrom ` code blocks into `<pre class="wavedrom">` elements and installs
+` ```wavedrom ` code blocks into `<script type="WaveDrom">` elements and installs
 the companion JavaScript assets. It is a fork of [mdbook-mermaid][] and is kept
 deliberately close to it (mostly a `mermaid` → `wavedrom` search/replace).
 
@@ -77,7 +77,7 @@ cargo test
 
 Expected result — everything green:
 
-- **Unit tests** (`src/lib.rs`): validate the Markdown → `<pre class="wavedrom">`
+- **Unit tests** (`src/lib.rs`): validate the Markdown → `<script type="WaveDrom">`
   transformation, HTML escaping, CRLF handling, tables/HTML/list passthrough.
 - **Integration tests** (`tests/it/`): run the real `install` command against the
   `empty` / `full` / `some` / `missing-js` `book.toml` fixtures, assert the
@@ -114,7 +114,7 @@ Then check that:
   `additional-js` entries for `wavedrom.min.js` / `wavedrom-init.js`.
 - `wavedrom.min.js` and `wavedrom-init.js` exist in `/tmp/wd-book`.
 - Building the book with `mdbook` (if available) produces HTML in which each
-  diagram is rendered as `<pre class="wavedrom">…</pre>`.
+  diagram is rendered as `<script type="WaveDrom">…</script>`.
 
 You can also exercise the preprocessor protocol directly:
 

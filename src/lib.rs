@@ -99,7 +99,7 @@ fn add_wavedrom(content: &str) -> Result<String> {
             let wavedrom_content = &content[code_span.clone()];
             let wavedrom_content = escape_html(wavedrom_content);
             let wavedrom_content = wavedrom_content.replace("\r\n", "\n");
-            let wavedrom_code = format!("<pre class=\"wavedrom\">{}</pre>\n\n", wavedrom_content);
+            let wavedrom_code = format!("<script type=\"WaveDrom\">{}</script>\n\n", wavedrom_content);
             wavedrom_blocks.push((span, wavedrom_code));
             start_new_code_span = true;
         }
@@ -142,10 +142,10 @@ Text
         let expected = r#"# Chapter
 
 
-<pre class="wavedrom">{signal: [
+<script type="WaveDrom">{signal: [
   {name: 'clk', wave: 'p.....|...'}
 ]}
-</pre>
+</script>
 
 
 
@@ -246,12 +246,12 @@ hello
 
         let expected = r#"
 
-<pre class="wavedrom">classDiagram
+<script type="WaveDrom">classDiagram
     class PingUploader {
         &lt;&lt;interface&gt;&gt;
         +Upload() UploadResult
     }
-</pre>
+</script>
 
 
 
@@ -278,10 +278,10 @@ Text
         let expected = r#"# Chapter
 
 
-<pre class="wavedrom">{signal: [
+<script type="WaveDrom">{signal: [
   {name: 'clk', wave: 'p.....|...'}
 ]}
-</pre>
+</script>
 
 
 
@@ -296,7 +296,7 @@ Text
         let _ = env_logger::try_init();
         let content = "# Chapter\r\n\r\n````wavedrom\r\n\r\n{signal: [\r\n{name: 'clk', wave: 'p.....|...'}\r\n]}\r\n````";
         let expected =
-            "# Chapter\r\n\r\n\n<pre class=\"wavedrom\">\n{signal: [\n{name: 'clk', wave: 'p.....|...'}\n]}\n</pre>\n\n";
+            "# Chapter\r\n\r\n\n<script type=\"WaveDrom\">\n{signal: [\n{name: 'clk', wave: 'p.....|...'}\n]}\n</script>\n\n";
 
         assert_eq!(expected, add_wavedrom(content).unwrap());
     }
